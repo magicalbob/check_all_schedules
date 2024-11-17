@@ -2,12 +2,20 @@
 import os
 import time
 import requests
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
-GITLAB_API_BASE = "https://gitlab.ellisbs.co.uk/api/v4"
-TOKEN = os.getenv("SELF_GITLAB_TOKEN")
-PORT = 8000  # Port for Prometheus to scrape
+# Load configuration from config.json
+with open("config.json") as config_file:
+    config = json.load(config_file)
+
+# Extract configuration values
+GITLAB_API_BASE = config.get("gitlab_api_base", "https://gitlab.ellisbs.co.uk/api/v4")
+TOKEN_ENV_VAR = config.get("token", "SELF_GITLAB_TOKEN")
+PORT = config.get("port", 8000)
+
+# Retrieve the actual token from the specified environment variable
+TOKEN = os.getenv(TOKEN_ENV_VAR)
 
 class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -68,4 +76,7 @@ def run_server():
     httpd.serve_forever()
 
 if __name__ == "__main__":
+    # Check if TOKEN is set
+    if not TOKEN:
+        raise EnvironmentError(f"The environment variable '{TOKEN_ENV_VAR}' is not set.")
     run_server()
