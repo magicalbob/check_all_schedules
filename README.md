@@ -58,6 +58,28 @@ scrape_configs:
   - job_name: 'gitlab_pipeline_schedules'
     static_configs:
       - targets: ['<your_host>:9100']
+    metrics_path: '/metrics'
+    scheme: http
+    honor_labels: true
+```
+
+### Docker
+
+A `Dockerfile` is provided to run the project as a cotainer.
+
+Build it like this:
+
+```
+docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:2024.11.17.11.37 .
+```
+
+then run it like this:
+
+```
+docker run -de "SELF_GITLAB_TOKEN=$SELF_GITLAB_TOKEN" \
+           -p 9100:9100 \
+	   --name check_all_schedules \
+           docker.ellisbs.co.uk:5190/check_all_schedules:2024.11.17.11.37
 ```
 
 ## Support
