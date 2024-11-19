@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import os
-import time
-import requests
 import json
 import logging
+import requests
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load configuration from config.json
 with open("config.json") as config_file:
@@ -46,40 +45,45 @@ def get_all_schedules_metrics():
     headers = {"PRIVATE-TOKEN": TOKEN}
     project_metrics = ""
 
-    # Get all projects
-    logging.info("Fetching projects from GitLab API...")
+    logging.info("Fetching all projects from GitLab API...")
+
+    # Fetch all projects
     projects_response = requests.get(f"{GITLAB_API_BASE}/projects?per_page=100", headers=headers)
     if projects_response.status_code != 200:
         logging.error(f"Failed to fetch projects: {projects_response.status_code} {projects_response.text}")
         return ""
     
     projects = projects_response.json()
+    logging.info(f"Total projects retrieved: {len(projects)}")
+
     for project in projects:
         project_id = project['id']
         project_path = project['path_with_namespace']
 
-        logging.info(f"Fetching pipeline schedules for project: {project_path}")
+        logging.info(f"Fetching pipeline schedules for project '{project_path}' (ID: {project_id})")
         schedules_response = requests.get(f"{GITLAB_API_BASE}/projects/{project_id}/pipeline_schedules", headers=headers)
         
         if schedules_response.status_code != 200:
-            logging.error(f"Failed to fetch schedules for project {project_path}: {schedules_response.status_code} {schedules_response.text}")
+            logging.error(f"Failed to fetch schedules for project '{project_path}': {schedules_response.status_code} {schedules_response.text}")
             continue
 
         schedules = schedules_response.json()
+        logging.info(f"Schedules retrieved for project '{project_path}': {len(schedules)}")
 
         for schedule in schedules:
             schedule_id = schedule['id']
             description = schedule['description']
 
-            logging.info(f"Fetching pipelines for schedule: {description} (ID: {schedule_id})")
+            logging.info(f"Processing schedule '{description}' (ID: {schedule_id})")
             pipelines_response = requests.get(f"{GITLAB_API_BASE}/projects/{project_id}/pipeline_schedules/{schedule_id}/pipelines?per_page=100", headers=headers)
             
             if pipelines_response.status_code != 200:
-                logging.error(f"Failed to fetch pipelines for schedule {schedule_id}: {pipelines_response.status_code} {pipelines_response.text}")
+                logging.error(f"Failed to fetch pipelines for schedule '{description}' in project '{project_path}': {pipelines_response.status_code} {pipelines_response.text}")
                 continue
 
             pipelines = pipelines_response.json()
             total = len(pipelines)
+            logging.info(f"Total pipelines found for schedule '{description}': {total}")
 
             if total > 0:
                 success = sum(1 for p in pipelines if p['status'] == 'success')
@@ -88,12 +92,12 @@ def get_all_schedules_metrics():
 
                 metric_name = f'gitlab_pipeline_schedule_success_rate{{project="{project_path}", schedule="{description}", color="{color}"}}'
                 project_metrics += f"{metric_name} {success_rate}\n"
-                logging.info(f"Success rate for schedule {description}: {success_rate:.2f}%")
+                logging.info(f"Success rate for schedule '{description}' in project '{project_path}': {success_rate:.2f}% (Color: {color})")
             else:
                 project_metrics += f'gitlab_pipeline_schedule_success_rate{{project="{project_path}", schedule="{description}", color="no_data"}} 0\n'
-                logging.info(f"No data for schedule {description} in project {project_path}")
+                logging.info(f"No data for schedule '{description}' in project '{project_path}'")
 
-    logging.info("Finished fetching metrics.")
+    logging.info("Completed fetching all metrics.")
     return project_metrics
 
 def run_server():
