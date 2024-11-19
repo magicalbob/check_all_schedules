@@ -16,6 +16,7 @@ with open("config.json") as config_file:
 GITLAB_API_BASE = config.get("gitlab_api_base", "https://gitlab.ellisbs.co.uk/api/v4")
 TOKEN_ENV_VAR = config.get("token", "SELF_GITLAB_TOKEN")
 PORT = config.get("port", 8000)
+GROUP = config.get("group", None) # Optional group to search in
 
 # Retrieve the actual token from the specified environment variable
 TOKEN = os.getenv(TOKEN_ENV_VAR)
@@ -59,6 +60,11 @@ def get_all_schedules_metrics():
     for project in projects:
         project_id = project['id']
         project_path = project['path_with_namespace']
+
+        # Check if a group is specified and if the project belongs to that group
+        if GROUP and GROUP not in project_path:
+            logging.info(f"Skipping project '{project_path}' as it does not belong to specified group '{GROUP}'.")
+            continue
 
         logging.info(f"Fetching pipeline schedules for project '{project_path}' (ID: {project_id})")
         schedules_response = requests.get(f"{GITLAB_API_BASE}/projects/{project_id}/pipeline_schedules", headers=headers)

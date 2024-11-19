@@ -1,5 +1,6 @@
 {
   "gitlab_api_base": "https://gitlab.ellisbs.co.uk/api/v4",
   "token": "SELF_GITLAB_TOKEN",
-  "port": 9100
+  "port": 9100,
+  "group": "ian"
 }
