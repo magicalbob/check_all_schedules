@@ -37,9 +37,6 @@ build:
   stage: build
   tags:
     - linux
-  image: docker:latest
-  services:
-    - docker:dind
   script:
     - echo "Building the Docker image..."
     - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:latest .
