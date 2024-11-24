@@ -43,4 +43,4 @@ build:
     - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP .
     - echo "Docker image built successfully"
     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
-    - docker push docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP
+    - docker image list
