@@ -15,11 +15,15 @@ before_script:
 
 setup:
   stage: setup
+  tags:
+    - linux
   script:
     - echo "Setting up the environment..."
 
 test:
   stage: test
+  tags:
+    - linux
   script:
     - echo "Running tests..."
     # Placeholder for actual testing commands. If you have a test suite,
@@ -31,6 +35,8 @@ test:
 
 build:
   stage: build
+  tags:
+    - linux
   image: docker:latest
   services:
     - docker:dind
