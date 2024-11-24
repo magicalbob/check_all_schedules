@@ -39,8 +39,8 @@ build:
     - linux
   script:
     - echo "Building the Docker image..."
-    - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:latest .
+    - TIMESTAMP=$(date +'%Y.%m.%d.%H.%M')
+    - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP .
     - echo "Docker image built successfully"
-    # Optional: Uncomment to push the image to a registry
-    # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
-    # - docker push docker.ellisbs.co.uk:7070/check_all_schedules:latest
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
+    - docker push docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP
