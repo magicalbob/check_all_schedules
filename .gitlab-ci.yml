@@ -9,6 +9,8 @@ variables:
 
 before_script:
   - apk add --no-cache python3 py3-pip # Install necessary packages for Alpine Linux
+  - python3 -m venv py3
+  - source py3/bin/activate
   - pip install --no-cache-dir -r requirements.txt
 
 setup:
