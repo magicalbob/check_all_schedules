@@ -38,9 +38,8 @@ build:
   tags:
     - linux
   script:
+    - echo "Docker login ..."
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
     - echo "Building the Docker image..."
     - TIMESTAMP=$(date +'%Y.%m.%d.%H.%M')
-    - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP .
-    - echo "Docker image built successfully"
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
-    - docker image list
+    - docker build --push -t docker.ellisbs.co.uk:7070/check_all_schedules:$TIMESTAMP .
