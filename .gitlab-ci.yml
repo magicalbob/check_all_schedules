@@ -1,0 +1,41 @@
+stages:
+  - setup
+  - test
+  - build
+
+variables:
+  # Set Python version to be used for testing
+  PYTHON_VERSION: "3.9"
+
+before_script:
+  - apk add --no-cache python3 py3-pip # Install necessary packages for Alpine Linux
+  - pip install --no-cache-dir -r requirements.txt
+
+setup:
+  stage: setup
+  script:
+    - echo "Setting up the environment..."
+
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+    # Placeholder for actual testing commands. If you have a test suite,
+    # you can run it here. For example:
+    # - pytest tests/  # Uncomment this line if you have tests defined with pytest
+  artifacts:
+    paths:
+      - tests/report.xml  # Specify any test artifacts if needed
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo "Building the Docker image..."
+    - docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:latest .
+    - echo "Docker image built successfully"
+    # Optional: Uncomment to push the image to a registry
+    # - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.ellisbs.co.uk:7070 
+    # - docker push docker.ellisbs.co.uk:7070/check_all_schedules:latest
