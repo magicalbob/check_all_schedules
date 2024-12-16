@@ -14,8 +14,8 @@ RUN pip install --no-cache-dir requests
 EXPOSE 9100
 
 # Define environment variable for the GitLab token
-# This is just an example; make sure to set this when you run the container
-# ENV SELF_GITLAB_TOKEN="your_token_here"
+ARG SELF_GITLAB_TOKEN="dummy_token"
+ENV SELF_GITLAB_TOKEN=$SELF_GITLAB_TOKEN
 
 # Run check_all_schedules.py when the container launches
 CMD ["python", "check_all_schedules.py"]

@@ -70,16 +70,16 @@ A `Dockerfile` is provided to run the project as a cotainer.
 Build it like this:
 
 ```
-docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:2024.11.17.11.37 .
+docker build -t docker.ellisbs.co.uk:7070/check_all_schedules:2024.11.24.14.46 .
 ```
 
-then run it like this:
+then push it and run it like this:
 
 ```
 docker run -de "SELF_GITLAB_TOKEN=$SELF_GITLAB_TOKEN" \
            -p 9100:9100 \
 	   --name check_all_schedules \
-           docker.ellisbs.co.uk:5190/check_all_schedules:2024.11.17.11.37
+           docker.ellisbs.co.uk:5190/check_all_schedules:2024.11.24.14.46 
 ```
 
 ## Support
