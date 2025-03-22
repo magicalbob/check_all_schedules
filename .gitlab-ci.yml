@@ -32,17 +32,21 @@ test:
   before_script:
     - pip install --upgrade pip setuptools wheel
     - pip install -r requirements.txt
-    - pip install coverage
+    - pip install coverage pytest pytest-cov
   script:
     - echo "Running unit tests..."
-    - python -m unittest check_all_schedules_test.py
-    # Generate coverage report for Sonar
+    # Run tests with pytest to generate JUnit XML reports
+    - python -m pytest check_all_schedules_test.py -v --junitxml=junit.xml
+    # Also generate coverage for SonarQube
     - coverage run check_all_schedules_test.py
     - coverage report
     - coverage xml -o coverage.xml
   artifacts:
     paths:
       - coverage.xml
+      - junit.xml
+    reports:
+      junit: junit.xml
 
 scan:
   image: docker.ellisbs.co.uk:5190/ubuntu:24.04
