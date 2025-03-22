@@ -49,6 +49,8 @@ scan:
   stage: scan
   tags:
     - linux
+  before_script: # Override the global before_script for this job
+    - apt-get update && apt-get install -y curl unzip
   script:
     - pushd ~
     - curl -o /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
