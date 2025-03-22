@@ -24,14 +24,25 @@ test:
   stage: test
   tags:
     - linux
+  image: python:3.9
+  before_script:
+    - pip install --upgrade pip setuptools wheel
+    - pip install -r requirements.txt
   script:
-    - echo "Running tests..."
-    # Placeholder for actual testing commands. If you have a test suite,
-    # you can run it here. For example:
-    # - pytest tests/  # Uncomment this line if you have tests defined with pytest
+    - echo "Running unit tests..."
+    - python -m unittest check_all_schedules_test.py
+    # Generate test coverage report
+    - pip install coverage
+    - coverage run -m unittest check_all_schedules_test.py
+    - coverage report
+    - coverage xml -o coverage-report.xml
   artifacts:
     paths:
-      - tests/report.xml  # Specify any test artifacts if needed
+      - coverage-report.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-report.xml
 
 build:
   stage: build
