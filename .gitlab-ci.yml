@@ -1,7 +1,8 @@
 stages:
   - setup
-  - test
   - build
+  - test
+  - scan
 
 variables:
   # Set Python version to be used for testing
