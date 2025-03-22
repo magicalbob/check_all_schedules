@@ -6,6 +6,9 @@ stages:
 variables:
   # Set Python version to be used for testing
   PYTHON_VERSION: "3.9"
+  SONAR_SCANNER_VERSION: 5.0.1.3006
+  GIT_STRATEGY: clone  # Ensure full clone is used in all jobs
+  GIT_DEPTH: 0  # Disable shallow clone for all jobs
 
 before_script:
   - apk add --no-cache python3 py3-pip # Install necessary packages for Alpine Linux
@@ -31,22 +34,28 @@ test:
     - pip install coverage
   script:
     - echo "Running unit tests..."
-    # Allow tests to fail but still proceed with pipeline
-    - python -m unittest check_all_schedules_test.py || echo "Tests failed but continuing"
-    # Run coverage anyway to get report on the code that does work
-    - coverage run --source=check_all_schedules.py -m unittest discover || true
-    - coverage report || true
-    - coverage xml -o coverage-report.xml || true
-    # Create an empty report file if coverage failed to ensure artifact exists
-    - touch coverage-report.xml
+    - python -m unittest check_all_schedules_test.py
+    # Generate coverage report for Sonar
+    - coverage run --source=check_all_schedules.py -m unittest check_all_schedules_test.py
+    - coverage report
+    - coverage xml -o coverage.xml
   artifacts:
-    when: always
     paths:
-      - coverage-report.xml
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage-report.xml
+      - coverage.xml
+
+scan:
+  image: docker.ellisbs.co.uk:5190/ubuntu:24.04
+  stage: scan
+  tags:
+    - linux
+  script:
+    - pushd ~
+    - curl -o /tmp/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}.zip
+    - unzip -n /tmp/sonar-scanner.zip
+    - popd
+    - ~/sonar-scanner-${SONAR_SCANNER_VERSION}/bin/sonar-scanner -Dsonar.token=$SONAR_TOKEN
+  dependencies:
+    - test
 
 build:
   stage: build
