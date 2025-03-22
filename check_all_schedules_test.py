@@ -116,7 +116,7 @@ class TestCheckAllSchedules(unittest.TestCase):
         
         self.assertEqual(total, 3)
         self.assertEqual(success, 1)
-        self.assertEqual(success_rate, 33.333333333333336)
+        self.assertAlmostEqual(success_rate, 33.333333333333336)
 
     def test_environment_variable_check(self):
         """Test that the script checks for required environment variables."""
