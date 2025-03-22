@@ -171,5 +171,56 @@ class TestCheckAllSchedules(unittest.TestCase):
         handler.do_HEAD()
         handler.send_error.assert_called_with(404, "Not Found")
 
+    @patch("requests.get")
+    @patch("logging.info")
+    @patch("logging.error")
+    def test_get_all_schedules_metrics_debug(self, mock_log_error, mock_log_info, mock_get):
+        # Setup
+        check_all_schedules.TOKEN = "test-token"
+        check_all_schedules.GROUP = "test-group"
+
+        # Create responses for different endpoints
+        projects_resp = MagicMock()
+        projects_resp.status_code = 200
+        projects_resp.json.return_value = [{"id": 1, "path_with_namespace": "test-group/project1"}]
+
+        schedules_resp = MagicMock()
+        schedules_resp.status_code = 200
+        schedules_resp.json.return_value = [{"id": 101, "description": "Test Schedule"}]
+
+        pipelines_resp = MagicMock()
+        pipelines_resp.status_code = 200
+        pipelines_resp.json.return_value = [{"status": "success"}, {"status": "success"}]
+
+        # Set up a side effect that correctly matches URL patterns
+        def side_effect(url, headers):
+            print(f"\nDEBUG - Request URL: {url}")
+
+            if "/pipeline_schedules" in url and "/pipelines" not in url:
+                print("DEBUG - Returning schedules response")
+                return schedules_resp
+            elif "/pipelines" in url:
+                print("DEBUG - Returning pipelines response")
+                return pipelines_resp
+            elif "/projects" in url and "pipeline_schedules" not in url:
+                print("DEBUG - Returning projects response")
+                return projects_resp
+            else:
+                print("DEBUG - URL not matched, returning default")
+                default_resp = MagicMock()
+                default_resp.status_code = 200
+                default_resp.json.return_value = []
+                return default_resp
+
+        mock_get.side_effect = side_effect
+
+        # Execute
+        metrics = check_all_schedules.get_all_schedules_metrics()
+        print(f"\nDEBUG - Returned metrics: {metrics}")
+
+        # Basic verification
+        self.assertTrue(len(metrics) > 0)
+        self.assertIn('Test Schedule', metrics)
+
 if __name__ == "__main__":
     unittest.main()
