@@ -6,7 +6,7 @@ stages:
 
 variables:
   # Set Python version to be used for testing
-  PYTHON_VERSION: "3.9"
+  PYTHON_VERSION: "3.13"
   SONAR_SCANNER_VERSION: 5.0.1.3006
   GIT_STRATEGY: clone  # Ensure full clone is used in all jobs
   GIT_DEPTH: 0  # Disable shallow clone for all jobs
@@ -28,7 +28,7 @@ test:
   stage: test
   tags:
     - linux
-  image: python:3.9
+  image: python:3.13
   before_script:
     - pip install --upgrade pip setuptools wheel
     - pip install -r requirements.txt
